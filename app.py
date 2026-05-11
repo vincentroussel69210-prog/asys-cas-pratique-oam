@@ -29,6 +29,60 @@ st.set_page_config(
     layout="wide",
 )
 
+# ----------------------------------------------------------------------------
+# Authentification simple par mot de passe (cas pratique ASYS)
+# ----------------------------------------------------------------------------
+def _check_password() -> bool:
+    """Affiche un écran de login. Le mot de passe vient de st.secrets['PASSWORD']."""
+    if st.session_state.get("password_correct"):
+        return True
+
+    # Récupération du mot de passe attendu (secrets en prod, fallback en local)
+    try:
+        expected = st.secrets["PASSWORD"]
+    except (KeyError, FileNotFoundError):
+        # Pas de secret configuré (local dev) → accès libre
+        return True
+
+    # UI de login centrée
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown(
+            """
+<div style="text-align:center;">
+  <h1 style="margin-bottom:4px;">📊 Cas pratique ASYS</h1>
+  <p style="color:#666;font-size:1.02em;margin-top:0;">
+    Online Acquisition Manager — Audit, prédiction & plan media
+  </p>
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("&nbsp;")
+
+        with st.form("login_form"):
+            pwd = st.text_input("Mot de passe", type="password", placeholder="Saisir le mot de passe communiqué")
+            submitted = st.form_submit_button("Accéder au dashboard", width="stretch")
+            if submitted:
+                if pwd == expected:
+                    st.session_state["password_correct"] = True
+                    st.rerun()
+                else:
+                    st.error("❌ Mot de passe incorrect")
+
+        st.caption(
+            "Accès restreint — le mot de passe vous a été communiqué par Vincent Roussel "
+            "dans le cadre du cas pratique Online Acquisition Manager."
+        )
+
+    return False
+
+
+if not _check_password():
+    st.stop()
+
+
 VERTICAL = "SaaS B2B RH — Chronos · GTA & planification multi-sites · grandes organisations privées + publiques (audiences DRH / RRH / SIRH)"
 
 # ----------------------------------------------------------------------------
